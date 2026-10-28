@@ -893,7 +893,7 @@ async function cargarDatosExpositor() {
   try {
     const correoGuardado = localStorage.getItem('correoUsuario') || localStorage.getItem('correo') || '';
 
-    const respuesta = await fetch('http://localhost:3000/feria/listar');
+    const respuesta = await fetch('/feria/listar');
     if (!respuesta.ok) throw new Error('Error al conectar con el servidor: ' + respuesta.status);
 
     const datos = await respuesta.json();
