@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Q17T | Panel del expositor</title>
+<link rel="stylesheet" href="expositor.style.css">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="logo"><span class="heart">💜</span> Q17T</div>
+    <button class="nav active" data-page="home"><span>⌂</span>Inicio</button>
+    <button class="nav" data-page="business"><span>♧</span>Mi emprendimiento</button>
+    <button class="nav" data-page="products"><span>⬡</span>Productos y servicios</button>
+    <button class="nav" data-page="profile"><span>♙</span>Mi perfil</button>
+    <div class="logout"><button class="nav" id="logout"><span>⇥</span>Cerrar sesión</button></div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <button class="mobile-menu" id="mobileMenu">☰</button>
+        <span class="topbar-title">Panel del expositor</span>
+      </div>
+      <div class="user">
+        <span style="font-size:22px">♧</span>
+        <div class="avatar" id="avatar">...</div>
+        <span class="name" id="userName">Cargando...</span>
+      </div>
+    </header>
+    <div class="page" id="content"></div>
+  </main>
+</div>
+
+<div id="modalRoot"></div>
+<div id="toastRoot"></div>
+
+<script>
+const state = {
+  page: 'home',
+  name: '',
+  email: '',
+  phone: '',
+  businesses: [],
+  products: [],
+  nextId: 1,
+  loading: true
+};
+
+const $ = s => document.querySelector(s);
+
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#39;'
+}[c]));
+
+function toast(s) {
+  $('#toastRoot').innerHTML = `<div class="toast">${esc(s)}</div>`;
+  setTimeout(() => {
+    $('#toastRoot').innerHTML = '';
+  }, 3000);
+}
+
+function badge(s) {
+  const clase = s === 'Aprobado'
+    ? 'approved'
+    : s === 'No aprobado'
+      ? 'rejected'
+      : '';
+  return `<span class="pill ${clase}">${esc(s)}</span>`;
+}
+
+function biz() {
+  return state.businesses[0];
+}
+
+function go(p) {
+  state.page = p;
+  $('#sidebar').classList.remove('open');
+  render();
+}
+
+function home() {
+  const b = biz();
+
+  return `
+    <div class="welcome">
+      <div>
+        <div class="eyebrow">Panel del expositor</div>
+        <h1>¡Hola, ${esc(state.name || 'emprendedor')}! 💜</h1>
+        <p>Gestiona tu emprendimiento y prepárate para la feria.</p>
+      </div>
+      <button class="btn" data-a="${b ? 'edit' : 'new'}">
+        ${b ? 'Ver mi emprendimiento' : '+ Registrar emprendimiento'}
+      </button>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-icon">▣</div>
+        <div>
+          <div class="stat-label">Mis emprendimientos</div>
+          <strong>${state.businesses.length}</strong>
+        </div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-icon">◷</div>
+        <div>
+          <div class="stat-label">Estado de solicitud</div>
+          <strong class="pink">${b ? esc(b.status) : 'Sin solicitud'}</strong>
+        </div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-icon">◇</div>
+        <div>
+          <div class="stat-label">Productos publicados</div>
+          <strong>${state.products.length}</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="dashboard-grid">
+      <div>
+        <div class="status-banner">
+          <div class="store-art">🏪</div>
+          <div>
+            <div class="eyebrow">Estado de tu participación</div>
+            <h2>${b ? esc(b.status) : 'Registra tu emprendimiento'}</h2>
+            <p>
+              ${!b
+                ? 'Completa la información de tu negocio para iniciar tu proceso de inscripción.'
+                : b.status === 'Aprobado'
+                  ? '¡Tu emprendimiento ha sido aprobado! Ya puedes preparar tu catálogo de productos y servicios.'
+                  : b.status === 'No aprobado'
+                    ? 'Tu solicitud no fue aprobada. Consulta con el equipo organizador para conocer los detalles.'
+                    : 'Tu solicitud está pendiente de revisión por parte del equipo organizador.'}
+            </p>
+          </div>
+          ${b
+            ? `<button class="btn outline" data-a="details">Ver detalles</button>`
+            : `<button class="btn outline" data-a="new">Comenzar</button>`}
+        </div>
+
+        <h2 class="section-title">Mis emprendimientos</h2>
+
+        <div class="table-card">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Emprendimiento</th>
+                <th>Categoría</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${state.businesses.length
+                ? state.businesses.map(x => `
+                  <tr>
+                    <td>
+                      <div class="biz">
+                        <div class="biz-img">${esc(x.emoji || '🏪')}</div>
+                        <div>
+                          <b>${esc(x.name)}</b>
+                          <small>${esc(x.location || 'Ubicación pendiente')}</small>
+                        </div>
+                      </div>
+                    </td>
+                    <td>${esc(x.category)}</td>
+                    <td>${badge(x.status)}</td>
+                    <td>
+                      <button class="btn ghost small" data-a="details">
+                        Ver detalles
+                      </button>
+                    </td>
+                  </tr>
+                `).join('')
+                : `<tr><td colspan="4">Aún no tienes emprendimientos registrados.</td></tr>`}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <aside class="help-card">
+        <div class="bulb">♧</div>
+        <h3>¿Necesitas ayuda?</h3>
+        <p>
+          Consulta la guía para conocer los pasos que debes seguir
+          para preparar tu participación en la feria.
+        </p>
+        <button class="btn outline" data-a="help">Ver guía</button>
+      </aside>
+    </div>
+  `;
+}
+
+function businessPage() {
+  const b = biz();
+
+  if (!b) {
+    return `
+      <div class="page-head">
+        <div>
+          <div class="eyebrow">Tu espacio de crecimiento</div>
+          <h1>Mi emprendimiento</h1>
+          <p>Registra tu negocio para participar en la feria.</p>
+        </div>
+        <button class="btn" data-a="new">＋ Registrar emprendimiento</button>
+      </div>
+
+      <div class="panel empty">
+        <div class="big">🏪</div>
+        <h3>Aún no tienes un emprendimiento registrado</h3>
+        <p>Completa tus datos para enviar la solicitud al equipo organizador.</p>
+        <button class="btn" data-a="new">Registrar mi emprendimiento</button>
+      </div>
+    `;
+  }
+
+  const aprobado = b.status === 'Aprobado';
+
+  return `
+    <div class="page-head">
+      <div>
+        <div class="eyebrow">Mi espacio de trabajo</div>
+        <h1>Mi Emprendimiento</h1>
+      </div>
+
+      <button class="btn" data-a="edit">
+        ＋ Registrar emprendimiento
+      </button>
+    </div>
+
+    <!-- ENCABEZADO DEL EMPRENDIMIENTO -->
+    <div style="
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 210px;
+      gap:18px;
+      margin-bottom:20px;
+    ">
+      <div class="panel" style="
+        margin:0;
+        padding:0;
+        overflow:hidden;
+        background:linear-gradient(115deg,#e83e91,#761b86,#421254);
+      ">
+        <div style="
+          display:flex;
+          align-items:center;
+          gap:16px;
+          padding:20px;
+          flex-wrap:wrap;
+        ">
+          <div style="
+            width:66px;
+            height:66px;
+            border-radius:50%;
+            display:grid;
+            place-items:center;
+            background:#fff0f7;
+            font-size:34px;
+            flex-shrink:0;
+          ">${esc(b.emoji || '☕')}</div>
+
+          <div style="flex:1;min-width:150px">
+            <h2 style="margin:0 0 3px;font-size:22px">
+              ${esc(b.name)}
+            </h2>
+            <p style="margin:0 0 9px;color:#f7dced">
+              ${esc(b.category)}
+            </p>
+            ${badge(b.status)}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <div id="business-tab-content">
+      <div style="
+        display:grid;
+        grid-template-columns:minmax(0,1fr) 230px;
+        gap:18px;
+        align-items:start;
+      ">
+        <div>
+          <div style="
+            display:grid;
+            grid-template-columns:repeat(3,minmax(0,1fr));
+            gap:12px;
+            margin-bottom:18px;
+          ">
+            <!-- DATOS DEL NEGOCIO -->
+            <div class="panel" style="margin:0;padding:15px">
+              <h3 style="font-size:14px">Datos del negocio</h3>
+
+              <small class="eyebrow">Descripción</small>
+              <p style="font-size:12px;line-height:1.7">
+                ${esc(b.description || 'Sin descripción registrada.')}
+              </p>
+
+              <small class="eyebrow">Contacto</small>
+              <p style="font-size:12px;overflow-wrap:anywhere">
+                ${esc(b.email || state.email || 'Sin correo registrado')}
+              </p>
+
+              <small class="eyebrow">Teléfono</small>
+              <p style="font-size:12px">
+                ${esc(b.phone || state.phone || 'Sin teléfono registrado')}
+              </p>
+            </div>
+
+            <!-- LOGÍSTICA -->
+            <div class="panel" style="margin:0;padding:15px">
+              <h3 style="font-size:14px">Logística de stand</h3>
+
+              <small style="color:var(--muted)">Número de stand asignado</small>
+
+              <div style="
+                height:105px;
+                margin:13px 0;
+                border-radius:10px;
+                background:linear-gradient(135deg,#402054,#241031);
+                display:grid;
+                place-items:center;
+                font-size:38px;
+              ">📍</div>
+
+              <p style="font-size:13px;margin:0">
+                <strong style="color:#ff6eb2">
+                  ${esc(b.stand || 'Por asignar')}
+                </strong>
+              </p>
+
+              <p class="hint">La ubicación aparecerá cuando sea asignada por la organización.</p>
+            </div>
+
+            <!-- EQUIPO -->
+            <div class="panel" style="margin:0;padding:15px">
+              <h3 style="font-size:14px">Equipo</h3>
+
+              <div style="display:flex;gap:10px;align-items:center;margin:15px 0">
+                <div class="avatar">👤</div>
+                <div>
+                  <strong style="font-size:12px;display:block">
+                    ${esc(state.name || 'Expositor')}
+                  </strong>
+                  <small style="color:var(--muted)">Responsable</small>
+                </div>
+              </div>
+
+              <p class="hint">
+                Los integrantes adicionales aparecerán cuando se habilite la gestión del equipo.
+              </p>
+            </div>
+          </div>
+
+          ${aprobado && state.products.length ? `
+            <div class="products">
+              ${state.products.slice(0,6).map(p => `
+                  <div class="product-info">
+                    <h3>${esc(p.name)}</h3>
+                    <div class="price">${money(p.price)}</div>
+                    <p>${esc(p.description)}</p>
+                    <button class="btn ghost small" data-a="products">
+                      Ver catálogo →
+                    </button>
+                  </div>
+                </article>
+              `).join('')}
+            </div>
+          ` : `
+          `}
+        </div>
+
+
+          <div class="help-card">
+            <div class="bulb">?</div>
+            <h3>¿Guías de ayuda?</h3>
+            <p>
+              Consulta la guía para conocer los pasos que debes seguir como expositor.
+            </p>
+            <button class="btn outline small" data-a="help">
+              Ver guía →
+            </button>
+          </div>
+        </aside>
+      </div>
+    </div>
+  `;
+}
+
+function productsPage() {
+  const approved = !!biz() && biz().status === 'Aprobado';
+
+  console.log('Datos del emprendimiento:', biz());
+  console.log('Estado aprobado:', approved);
+
+  if (!approved) {
+    return `
+      <div class="page-head">
+        <div>
+          <div class="eyebrow">Tu catálogo</div>
+          <h1>Productos y servicios</h1>
+          <p>Administra lo que ofrecerás en la feria.</p>
+        </div>
+      </div>
+
+      <div class="panel empty">
+        <div class="big">🔒</div>
+        <h3>Esta sección está bloqueada por ahora</h3>
+        <p>
+          Podrás agregar imágenes, precios y descripciones cuando
+          tu emprendimiento sea aprobado.
+        </p>
+        <button class="btn outline" data-a="refresh-status">
+            ↻ Actualizar estado
+          </button>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="page-head">
+      <div>
+        <div class="eyebrow">Tu catálogo</div>
+        <h1>Productos y servicios</h1>
+        <p>Presenta tus productos con fotos, precios y descripciones.</p>
+      </div>
+      <button class="btn" data-a="add">＋ Agregar producto</button>
+    </div>
+
+    <div class="products">
+      ${state.products.map(p => `
+        <article class="product">
+          <div class="product-image">
+            ${p.image
+              ? `<img src="${p.image}" alt="${esc(p.name)}">`
+              : esc(p.emoji || '🛍️')}
+          </div>
+
+          <div class="product-info">
+            <h3>${esc(p.name)}</h3>
+            <div class="price">${money(p.price)}</div>
+            <p>${esc(p.description)}</p>
+
+            <div class="product-actions">
+              <button class="btn ghost small" data-a="edit-product" data-id="${p.id}">
+                Editar
+              </button>
+              <button class="btn outline small" data-a="delete-product" data-id="${p.id}">
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </article>
+      `).join('')}
+    </div>
+  `;
+}
+
+function money(n) {
+  return new Intl.NumberFormat('es-CO', {
+    style: 'currency',
+    currency: 'COP',
+    maximumFractionDigits: 0
+  }).format(Number(n) || 0);
+}
+
+function profilePage() {
+  return `
+    <div class="page-head">
+      <div>
+        <div class="eyebrow">Tu cuenta</div>
+        <h1>Mi perfil</h1>
+        <p>Actualiza tus datos de contacto.</p>
+      </div>
+    </div>
+
+    <form id="profileForm" class="panel" style="max-width:700px">
+      <div class="form-grid">
+        <div class="field">
+          <label>Nombre completo</label>
+          <input id="pn" required value="${esc(state.name)}">
+        </div>
+
+        <div class="field">
+          <label>Correo electrónico</label>
+          <input id="pe" type="email" required value="${esc(state.email)}">
+        </div>
+
+        <div class="field">
+          <label>Teléfono</label>
+          <input id="pp" value="${esc(state.phone)}" placeholder="Tu teléfono">
+        </div>
+      </div>
+
+      <button class="btn" type="submit">Guardar cambios</button>
+    </form>
+  `;
+}
+
+function helpPage() {
+  return `
+    <div class="page-head">
+      <div>
+        <div class="eyebrow">Centro de ayuda</div>
+        <h1>Guía para expositores</h1>
+        <p>Estos son los pasos para preparar tu participación.</p>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>¿Cómo funciona?</h3>
+      <p>1. Registra tu emprendimiento y completa los datos solicitados.</p>
+      <p>2. Espera a que el equipo organizador revise la solicitud.</p>
+      <p>3. Cuando el estado sea <b style="color:var(--green)">Aprobado</b>, entra a Productos y servicios.</p>
+      <p>4. Añade el nombre, las fotos, el precio y la descripción de cada publicación.</p>
+    </div>
+  `;
+}
+
+function render() {
+  document.querySelectorAll('[data-page]').forEach(b => {
+    b.classList.toggle('active', b.dataset.page === state.page);
+  });
+
+  $('#content').innerHTML =
+    state.page === 'home' ? home() :
+    state.page === 'business' ? businessPage() :
+    state.page === 'products' ? productsPage() :
+    state.page === 'profile' ? profilePage() :
+    helpPage();
+
+  wire();
+}
+
+function wire() {
+  document.querySelectorAll('[data-a]').forEach(b => {
+    b.onclick = () => {
+      const a = b.dataset.a;
+
+      if (a === 'new' || a === 'edit') {
+        if (a === 'edit') {
+          toast('Los datos registrados se consultan aquí.');
+          return;
+        }
+        go('business');
+      }
+
+      if (a === 'details') go('business');
+      if (a === 'products') go('products');
+      if (a === 'help') go('help');
+      if (a === 'add') productModal();
+
+      if (a === 'approve') {
+        toast('El estado real lo actualiza el administrador desde el sistema.');
+      }
+
+      
+        if (a === 'delete-product') {
+            if (confirm('¿Eliminar este producto?')) {
+                eliminarProducto(b.dataset.id);
+            }
+      }
+
+
+      if (a === 'edit-product') {
+        productModal(
+          state.products.find(p => p.id === Number(b.dataset.id))
+        );
+      }
+
+      if (a === 'refresh-status') {
+        cargarDatosExpositor();
+      }
+    };
+  });
+
+  const f = $('#businessForm');
+  if (f) {
+    f.onsubmit = e => {
+      e.preventDefault();
+      state.businesses.push({
+        id: state.nextId++,
+        name: $('#bn').value,
+        category: $('#bc').value,
+        description: $('#bd').value,
+        email: $('#be').value,
+        phone: $('#bp').value,
+        location: $('#bl').value,
+        status: 'En revisión',
+        emoji: '🌱'
+      });
+      go('business');
+      toast('Solicitud registrada.');
+    };
+  }
+
+  const pf = $('#profileForm');
+  if (pf) {
+    pf.onsubmit = e => {
+      e.preventDefault();
+      state.name = $('#pn').value;
+      state.email = $('#pe').value;
+      state.phone = $('#pp').value;
+
+      $('#userName').textContent = state.name + ' ⌄';
+      $('#avatar').textContent = state.name
+        .split(/\s+/)
+        .map(x => x[0])
+        .join('')
+        .slice(0, 2)
+        .toUpperCase();
+
+      render();
+      toast('Perfil actualizado.');
+    };
+  }
+}
+
+
+async function eliminarProducto(id) {
+    try {
+        const idExpositor = biz()?.id;
+
+        if (!idExpositor) {
+            throw new Error('No se encontró el emprendimiento.');
+        }
+
+        const respuesta = await fetch(
+            `http://localhost:3000/feria/productos/${id}?id_expositor=${idExpositor}`,
+            {
+                method: 'DELETE',
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('access_token')}`
+                }
+            }
+        );
+
+        const resultado = await respuesta.json();
+
+        if (!respuesta.ok) {
+            throw new Error(
+                resultado.mensaje || 'No se pudo eliminar el producto.'
+            );
+        }
+
+        await cargarDatosExpositor();
+        toast(resultado.mensaje);
+
+    } catch (error) {
+        console.error('Error al eliminar:', error);
+        alert(error.message);
+    }
+}
+
+
+function productModal(p) {
+  const edit = !!p;
+
+  $('#modalRoot').innerHTML = `
+    <div class="modal-bg" id="modalBg">
+      <form class="modal" id="productForm">
+        <div class="modal-head">
+          <h2>${edit ? 'Editar producto' : 'Agregar producto o servicio'}</h2>
+          <button type="button" class="close" id="close">✕</button>
+        </div>
+
+        <div class="field">
+          <label>Nombre del producto *</label>
+          <input id="prodName" required value="${esc(p?.name || '')}" placeholder="Ej. Cupcakes">
+        </div>
+
+        <div class="form-grid">
+          <div class="field">
+            <label>Precio (COP) *</label>
+            <input id="prodPrice" type="number" min="0" required value="${esc(p?.price ?? '')}" placeholder="10000">
+          </div>
+
+          <div class="field">
+            <label>Icono de muestra</label>
+            <select id="prodEmoji">
+              <option>🛍️</option>
+              <option ${p?.emoji === '🧁' ? 'selected' : ''}>🧁</option>
+              <option ${p?.emoji === '🍪' ? 'selected' : ''}>🍪</option>
+              <option ${p?.emoji === '💍' ? 'selected' : ''}>💍</option>
+              <option ${p?.emoji === '🎨' ? 'selected' : ''}>🎨</option>
+              <option ${p?.emoji === '🕯️' ? 'selected' : ''}>🕯️</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Descripción *</label>
+          <textarea id="prodDesc" required>${esc(p?.description || '')}</textarea>
+        </div>
+
+        <div class="field">
+          <label>Imagen (opcional)</label>
+          <div class="product-image-preview" id="productImagePreview">
+            ${p?.image ? `<img src="${esc(p.image)}" alt="Imagen actual de ${esc(p.name)}">` : esc(p?.emoji || '📦')}
+          </div>
+          <input type="file" id="prodImage" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp">
+          <small>JPG, PNG o WebP. Máximo 5 MB.</small>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn ghost" id="cancel">Cancelar</button>
+          <button class="btn" type="submit">Guardar producto</button>
+        </div>
+      </form>
+    </div>
+  `;
+
+  const close = () => { $('#modalRoot').innerHTML = ''; };
+
+  $('#close').onclick = close;
+  $('#cancel').onclick = close;
+  $('#modalBg').onclick = e => { if (e.target.id === 'modalBg') close(); };
+
+  $('#prodImage').onchange = () => {
+    const archivo = $('#prodImage').files[0];
+    if (!archivo) return;
+
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(archivo.type)) {
+      $('#prodImage').value = '';
+      alert('Selecciona una imagen JPG, PNG o WebP.');
+      return;
+    }
+
+    if (archivo.size > 5 * 1024 * 1024) {
+      $('#prodImage').value = '';
+      alert('La imagen no puede superar los 5 MB.');
+      return;
+    }
+
+    const imagen = document.createElement('img');
+    imagen.alt = 'Vista previa de la imagen seleccionada';
+    imagen.src = URL.createObjectURL(archivo);
+    $('#productImagePreview').replaceChildren(imagen);
+  };
+
+  
+$('#productForm').onsubmit = async e => {
+    e.preventDefault();
+
+    const botonGuardar = $('#productForm').querySelector(
+        'button[type="submit"]'
+    );
+
+    botonGuardar.disabled = true;
+    botonGuardar.textContent = 'Guardando...';
+
+    try {
+        const idExpositor = biz()?.id;
+
+        if (!idExpositor) {
+            throw new Error('No se encontró el emprendimiento.');
+        }
+
+        const file = $('#prodImage').files[0];
+
+let imagenUrl = p?.image || p?.imagen_url || null;
+
+if (file) {
+    const token = localStorage.getItem('access_token');
+
+    if (!token) {
+        throw new Error(
+            'No se encontró tu sesión. Cierra sesión e inicia sesión nuevamente.'
+        );
+    }
+
+    const formularioImagen = new FormData();
+
+    formularioImagen.append('imagen', file);
+    formularioImagen.append('id_expositor', String(idExpositor));
+    if (edit) formularioImagen.append('id_producto', String(p.id));
+
+    const respuestaImagen = await fetch(
+        'http://localhost:3000/feria/productos/imagen',
+        {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
+            body: formularioImagen
+        }
+    );
+
+    
+    const textoImagen = await respuestaImagen.text();
+
+    let resultadoImagen;
+
+    try {
+        resultadoImagen = JSON.parse(textoImagen);
+    } catch (error) {
+        console.error('Respuesta recibida al subir imagen:', textoImagen);
+
+        throw new Error(
+            'El servidor devolvió HTML en vez de JSON. Revisa la consola F12.'
+        );
+    }
+
+    if (!respuestaImagen.ok) {
+        throw new Error(
+            resultadoImagen.mensaje || 'No se pudo subir la imagen.'
+        );
+    }
+
+    imagenUrl = resultadoImagen.imagen_url;
+
+}
+
+        const datos = {
+            id_expositor: Number(idExpositor),
+            nombre: $('#prodName').value.trim(),
+            precio: Number($('#prodPrice').value),
+            icono: $('#prodEmoji').value,
+            descripcion: $('#prodDesc').value.trim()
+        };
+
+        if (file) datos.imagen_url = imagenUrl;
+
+        const url = edit
+            ? `http://localhost:3000/feria/productos/${p.id}`
+            : 'http://localhost:3000/feria/productos';
+
+        const respuesta = await fetch(url, {
+            method: edit ? 'PUT' : 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${localStorage.getItem('access_token')}`
+            },
+            body: JSON.stringify(datos)
+        });
+
+        const texto = await respuesta.text();
+
+          console.log('Código de respuesta:', respuesta.status);
+          console.log('Respuesta del servidor:', texto);
+
+          let resultado;
+
+          try {
+              resultado = JSON.parse(texto);
+          } catch (error) {
+              throw new Error(
+                  'El servidor devolvió HTML en lugar de JSON. Revisa la consola (F12).'
+              );
+        }
+
+        close();
+
+        // Consultar nuevamente los productos guardados
+        await cargarDatosExpositor();
+
+        toast(resultado.mensaje);
+
+    } catch (error) {
+        console.error('Error al guardar:', error);
+        alert(error.message);
+        botonGuardar.disabled = false;
+        botonGuardar.textContent = 'Guardar producto';
+    }
+};
+
+}
+
+// Navegación del panel
+document.querySelectorAll('[data-page]').forEach(b => {
+  b.onclick = () => go(b.dataset.page);
+});
+
+// Menú móvil
+$('#mobileMenu').onclick = () => {
+  $('#sidebar').classList.toggle('open');
+};
+
+// Cerrar sesión
+$('#logout').onclick = () => cerrarSesion();
+
+// Cargar datos reales desde la base de datos vía backend
+async function cargarDatosExpositor() {
+  try {
+    const correoGuardado = localStorage.getItem('correoUsuario') || localStorage.getItem('correo') || '';
+
+    const respuesta = await fetch('http://localhost:3000/feria/listar');
+    if (!respuesta.ok) throw new Error('Error al conectar con el servidor: ' + respuesta.status);
+
+    const datos = await respuesta.json();
+    const lista = Array.isArray(datos) ? datos : (datos.expositores || datos.data || []);
+
+    let exp = correoGuardado
+      ? lista.find(e => String(e.correo || '').trim().toLowerCase() === correoGuardado.trim().toLowerCase())
+      : null;
+
+    if (!exp && !correoGuardado) exp = lista[0];
+
+    if (!exp) throw new Error('No se encontró un expositor asociado a esta sesión.');
+
+    const estadoRaw = String(exp.estado || 'pendiente').trim().toLowerCase();
+    let estado = 'En revisión';
+
+    if (estadoRaw === 'aprobado' || estadoRaw === 'aprobada') {
+      estado = 'Aprobado';
+    } else if (['rechazado', 'rechazada', 'no aprobado', 'no_aprobado'].includes(estadoRaw)) {
+      estado = 'No aprobado';
+    }
+
+    state.name = exp.nombre || 'Emprendedor';
+    state.email = exp.correo || '';
+    state.phone = exp.telefono || exp.celular || '';
+
+    state.businesses = [{
+      id: exp.id || exp.id_emprendimiento || 1,
+      name: exp.nombre_emprendimiento || 'Mi emprendimiento',
+      category: exp.categoria || 'Sin categoría',
+      description: exp.descripcion || 'Sin descripción registrada.',
+      status: estado,
+      emoji: '🏪',
+      email: exp.correo || '',
+      phone: state.phone,
+      location: exp.ubicacion || exp.ciudad || ''
+    }];
+
+    
+    // Cargar los productos guardados del expositor
+    const idExpositor = state.businesses[0].id;
+
+    const respuestaProductos = await fetch(
+        `http://localhost:3000/feria/productos/expositor/${idExpositor}`
+    );
+
+    if (!respuestaProductos.ok) {
+        throw new Error('No se pudieron cargar los productos.');
+    }
+
+    const resultadoProductos = await respuestaProductos.json();
+
+    state.products = (resultadoProductos.datos || []).map(p => ({
+        id: p.id,
+        name: p.nombre,
+        price: p.precio,
+        emoji: p.icono || '🛍️',
+        description: p.descripcion || '',
+        image: p.imagen_url || ''
+    }));
+
+
+    state.loading = false;
+
+    const userName = document.getElementById('userName');
+    const avatar = document.getElementById('avatar');
+
+    if (userName) userName.textContent = state.name + ' ⌄';
+    if (avatar) {
+      avatar.textContent = state.name
+        .split(/\s+/)
+        .map(x => x[0])
+        .join('')
+        .slice(0, 2)
+        .toUpperCase();
+    }
+
+    render();
+
+  } catch (error) {
+    console.error('Error:', error);
+    state.loading = false;
+    $('#content').innerHTML = `
+      <div class="panel empty">
+        <div class="big">⚠️</div>
+        <h3>No se pudieron cargar tus datos</h3>
+        <p>${esc(error.message)}</p>
+        <button class="btn" id="retryLoad">Intentar nuevamente</button>
+      </div>
+    `;
+    const retry = document.getElementById('retryLoad');
+    if (retry) retry.onclick = cargarDatosExpositor;
+  }
+}
+
+function cerrarSesion() {
+  localStorage.clear();
+  sessionStorage.clear();
+  window.location.href = 'index.html';
+}
+
+// Iniciar aplicación
+cargarDatosExpositor();
+</script>
+</body>
+</html>

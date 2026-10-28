@@ -1,0 +1,639 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administración | Feria de Emprendedores</title>
+    <link rel="stylesheet" href="admin.style.css">
+</head>
+<body>
+
+<div class="app">
+
+    <!-- BARRA LATERAL -->
+    <aside class="sidebar">
+        <div class="logo"><span class="heart">♥</span> FERIA</div>
+
+        <button type="button" class="nav active"
+            onclick="mostrarPantalla('pantalla-expositores', this)">
+            <span>👥</span> Expositores registrados
+        </button>
+
+        <button type="button" class="nav"
+            onclick="mostrarPantalla('pantalla-agregar', this)">
+            <span>➕</span> Agregar expositor
+        </button>
+
+        <div class="logout">
+            <button type="button" class="nav" onclick="cerrarSesion()">
+                <span>↪</span> Cerrar sesión
+            </button>
+        </div>
+    </aside>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="main">
+
+        <header class="topbar">
+            <div class="topbar-left">
+                <button type="button" class="mobile-menu"
+                    onclick="document.querySelector('.sidebar').classList.toggle('open')">
+                    ☰
+                </button>
+                <span class="topbar-title">Panel de administración</span>
+            </div>
+
+            <div class="user">
+                <div class="avatar">A</div>
+                <span class="name">Administrador</span>
+            </div>
+        </header>
+
+        <div class="page">
+
+            <!-- PANTALLA DE EXPOSITORES -->
+            <section id="pantalla-expositores" class="pantalla activa">
+
+                <div class="page-head">
+                    <div>
+                        <span class="eyebrow">GESTIÓN DE LA FERIA</span>
+                        <h1>Expositores registrados</h1>
+                        <p>Administra las inscripciones y los emprendimientos.</p>
+                    </div>
+                </div>
+
+                <!-- TARJETAS DE ESTADÍSTICAS -->
+                <div class="stats">
+
+                    <div class="stat">
+                        <div class="stat-icon">🕒</div>
+                        <div>
+                            <div class="stat-label">Pendientes</div>
+                            <strong id="total-pendientes">0</strong>
+                        </div>
+                    </div>
+
+                    <div class="stat">
+                        <div class="stat-icon">✓</div>
+                        <div>
+                            <div class="stat-label">Aprobados</div>
+                            <strong id="total-aprobados" class="pink">0</strong>
+                        </div>
+                    </div>
+
+                    <div class="stat">
+                        <div class="stat-icon">✕</div>
+                        <div>
+                            <div class="stat-label">Rechazados</div>
+                            <strong id="total-rechazados">0</strong>
+                        </div>
+                    </div>
+
+                </div>
+
+                <h2 class="section-title">Lista de expositores</h2>
+
+                <div class="table-card">
+                    <div class="table-scroll">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Correo</th>
+                                    <th>Emprendimiento</th>
+                                    <th>Categoría</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="tabla-expositores">
+                                <tr>
+                                    <td colspan="6" class="no-data">
+                                        Cargando expositores...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- PANTALLA PARA AGREGAR EXPOSITOR -->
+            <section id="pantalla-agregar" class="pantalla">
+
+                <div class="page-head">
+                    <div>
+                        <span class="eyebrow">GESTIÓN DE LA FERIA</span>
+                        <h1>Agregar expositor</h1>
+                        <p>Registra un nuevo expositor y su emprendimiento.</p>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h3>Información del expositor</h3>
+
+                    <form id="form-expositor">
+
+                        <div class="form-grid">
+
+                            <div class="field">
+                                <label for="nombre">Nombre completo</label>
+                                <input type="text" id="nombre" name="nombre"
+                                    placeholder="Nombre del expositor" required>
+                            </div>
+
+                            <div class="field">
+                                <label for="correo">Correo electrónico</label>
+                                <input type="email" id="correo" name="correo"
+                                    placeholder="correo@ejemplo.com" required>
+                            </div>
+
+                            <div class="field">
+                                <label for="nombre_emprendimiento">
+                                    Nombre del emprendimiento
+                                </label>
+                                <input type="text" id="nombre_emprendimiento"
+                                    name="nombre_emprendimiento"
+                                    placeholder="Nombre del negocio" required>
+                            </div>
+
+                            <div class="field">
+                                <label for="categoria">Categoría</label>
+                                <input type="text" id="categoria" name="categoria"
+                                    placeholder="Ej. Comida, ropa, artesanías" required>
+                            </div>
+
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn ghost"
+                                onclick="document.getElementById('form-expositor').reset()">
+                                Limpiar
+                            </button>
+
+                            <button type="submit" class="btn" id="btn-registrar">
+                                Registrar expositor
+                            </button>
+                        </div>
+
+                    </form>
+
+                    <p id="mensaje-formulario" class="form-message" role="status"></p>
+                </div>
+
+            </section>
+
+        </div>
+    </main>
+
+</div>
+
+<!-- VENTANA EMERGENTE PARA EDITAR EXPOSITOR -->
+<div id="modal-editar" class="modal-bg hidden"
+    role="dialog" aria-modal="true" aria-labelledby="titulo-modal">
+
+    <div class="modal">
+
+        <div class="modal-head">
+            <div>
+                <span class="eyebrow">GESTIÓN DE LA FERIA</span>
+                <h2 id="titulo-modal">Editar expositor</h2>
+            </div>
+
+            <button type="button" class="close"
+                aria-label="Cerrar ventana" onclick="cerrarModalEditar()">
+                ✕
+            </button>
+        </div>
+
+        <p class="modal-description">
+            Modifica los datos del expositor seleccionado.
+        </p>
+
+        <form id="form-editar">
+
+            <input type="hidden" id="editar-id">
+
+            <div class="field">
+                <label for="editar-nombre">Nombre completo</label>
+                <input type="text" id="editar-nombre"
+                    placeholder="Nombre del expositor" required>
+            </div>
+
+            <div class="field">
+                <label for="editar-correo">Correo electrónico</label>
+                <input type="email" id="editar-correo"
+                    placeholder="correo@ejemplo.com" required>
+            </div>
+
+            <div class="field">
+                <label for="editar-emprendimiento">
+                    Nombre del emprendimiento
+                </label>
+                <input type="text" id="editar-emprendimiento"
+                    placeholder="Nombre del negocio" required>
+            </div>
+
+            <div class="field">
+                <label for="editar-categoria">Categoría</label>
+                <input type="text" id="editar-categoria"
+                    placeholder="Categoría del emprendimiento" required>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn ghost"
+                    onclick="cerrarModalEditar()">
+                    Cancelar
+                </button>
+
+                <button type="submit" class="btn" id="btn-guardar-edicion">
+                    Guardar cambios
+                </button>
+            </div>
+
+        </form>
+
+        <p id="mensaje-edicion" class="form-message" role="status"></p>
+
+    </div>
+</div>
+
+<script>
+const API = 'http://localhost:3000/feria';
+
+/* CAMBIAR ENTRE PANTALLAS */
+function mostrarPantalla(idPantalla, boton) {
+    document.querySelectorAll('.pantalla').forEach(pantalla => {
+        pantalla.classList.remove('activa');
+    });
+
+    document.getElementById(idPantalla).classList.add('activa');
+
+    document.querySelectorAll('.sidebar .nav').forEach(opcion => {
+        opcion.classList.remove('active');
+    });
+
+    boton.classList.add('active');
+    document.querySelector('.sidebar').classList.remove('open');
+
+    if (idPantalla === 'pantalla-expositores') {
+        cargarExpositores();
+    }
+}
+
+/* OBTENER TOKEN DE SESIÓN */
+function obtenerToken() {
+    return localStorage.getItem('access_token');
+}
+
+/* PETICIONES PROTEGIDAS */
+async function peticionProtegida(url, opciones = {}) {
+    const token = obtenerToken();
+
+    if (!token) {
+        alert('Tu sesión ha expirado. Inicia sesión nuevamente.');
+        window.location.href = 'index.html';
+        throw new Error('No hay sesión activa.');
+    }
+
+    const respuesta = await fetch(url, {
+        ...opciones,
+        headers: {
+            ...opciones.headers,
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        }
+    });
+
+    const texto = await respuesta.text();
+
+    let datos = {};
+
+    try {
+        datos = texto ? JSON.parse(texto) : {};
+    } catch {
+        datos = { mensaje: texto };
+    }
+
+    if (!respuesta.ok) {
+        throw new Error(
+            datos.mensaje || datos.error || 'No se pudo completar la operación.'
+        );
+    }
+
+    return datos;
+}
+
+/* CARGAR Y MOSTRAR EXPOSITORES */
+async function cargarExpositores() {
+    const tabla = document.getElementById('tabla-expositores');
+
+    tabla.innerHTML = `
+        <tr>
+            <td colspan="6" class="no-data">Cargando expositores...</td>
+        </tr>
+    `;
+
+    try {
+        const resultado = await peticionProtegida(`${API}/listar`);
+
+        const expositores = Array.isArray(resultado)
+            ? resultado
+            : (resultado.expositores || resultado.data || []);
+
+        document.getElementById('total-pendientes').textContent =
+            expositores.filter(e => e.estado === 'pendiente').length;
+
+        document.getElementById('total-aprobados').textContent =
+            expositores.filter(e => e.estado === 'aprobado').length;
+
+        document.getElementById('total-rechazados').textContent =
+            expositores.filter(e => e.estado === 'rechazado').length;
+
+        if (expositores.length === 0) {
+            tabla.innerHTML = `
+                <tr>
+                    <td colspan="6" class="no-data">
+                        No hay expositores registrados todavía.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        tabla.innerHTML = '';
+
+        expositores.forEach(expositor => {
+            const fila = document.createElement('tr');
+
+            [
+                expositor.nombre,
+                expositor.correo,
+                expositor.nombre_emprendimiento,
+                expositor.categoria
+            ].forEach(valor => {
+                const celda = document.createElement('td');
+                celda.textContent = valor || '-';
+                fila.appendChild(celda);
+            });
+
+            /* ESTADO */
+            const celdaEstado = document.createElement('td');
+            const etiqueta = document.createElement('span');
+
+            etiqueta.textContent = expositor.estado || 'pendiente';
+
+            const clasesEstado = {
+                pendiente: 'badge-pendiente',
+                aprobado: 'badge-aprobado',
+                rechazado: 'badge-rechazado'
+            };
+
+            etiqueta.className =
+                clasesEstado[expositor.estado] || 'badge-pendiente';
+
+            celdaEstado.appendChild(etiqueta);
+            fila.appendChild(celdaEstado);
+
+            /* BOTONES DE ACCIONES */
+            const celdaAcciones = document.createElement('td');
+            celdaAcciones.className = 'acciones';
+
+            if (expositor.estado === 'pendiente') {
+                celdaAcciones.appendChild(
+                    crearBoton('Aprobar', 'btn-aprobar', () =>
+                        cambiarEstado(expositor.id, 'aprobado')
+                    )
+                );
+
+                celdaAcciones.appendChild(
+                    crearBoton('Rechazar', 'btn-rechazar', () =>
+                        cambiarEstado(expositor.id, 'rechazado')
+                    )
+                );
+            }
+
+            celdaAcciones.appendChild(
+                crearBoton('Editar', 'btn-editar', () =>
+                    editarExpositor(expositor)
+                )
+            );
+
+            celdaAcciones.appendChild(
+                crearBoton('Eliminar', 'btn-rechazar', () =>
+                    eliminarExpositor(expositor.id)
+                )
+            );
+
+            fila.appendChild(celdaAcciones);
+            tabla.appendChild(fila);
+        });
+
+    } catch (error) {
+        tabla.innerHTML = '';
+
+        const fila = document.createElement('tr');
+        const celda = document.createElement('td');
+
+        celda.colSpan = 6;
+        celda.className = 'no-data';
+        celda.textContent = error.message;
+
+        fila.appendChild(celda);
+        tabla.appendChild(fila);
+    }
+}
+
+/* CREAR BOTONES */
+function crearBoton(texto, clase, accion) {
+    const boton = document.createElement('button');
+
+    boton.type = 'button';
+    boton.textContent = texto;
+    boton.className = `btn small ${clase}`;
+    boton.addEventListener('click', accion);
+
+    return boton;
+}
+
+/* CAMBIAR ESTADO DEL EXPOSITOR */
+async function cambiarEstado(id, estado) {
+    const accion = estado === 'aprobado' ? 'aprobar' : 'rechazar';
+
+    if (!confirm(`¿Deseas ${accion} este expositor?`)) {
+        return;
+    }
+
+    try {
+        await peticionProtegida(`${API}/expositores/${id}/estado`, {
+            method: 'PUT',
+            body: JSON.stringify({ estado })
+        });
+
+        alert(
+            `Expositor ${estado === 'aprobado' ? 'aprobado' : 'rechazado'} correctamente.`
+        );
+
+        await cargarExpositores();
+
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+/* ABRIR LA VENTANA EMERGENTE Y CARGAR LOS DATOS */
+function editarExpositor(expositor) {
+    document.getElementById('editar-id').value = expositor.id;
+    document.getElementById('editar-nombre').value = expositor.nombre || '';
+    document.getElementById('editar-correo').value = expositor.correo || '';
+
+    document.getElementById('editar-emprendimiento').value =
+        expositor.nombre_emprendimiento || '';
+
+    document.getElementById('editar-categoria').value =
+        expositor.categoria || '';
+
+    document.getElementById('mensaje-edicion').textContent = '';
+
+    document.getElementById('modal-editar').classList.remove('hidden');
+
+    document.getElementById('editar-nombre').focus();
+}
+
+/* CERRAR LA VENTANA */
+function cerrarModalEditar() {
+    document.getElementById('modal-editar').classList.add('hidden');
+}
+
+/* GUARDAR LOS CAMBIOS DE EDICIÓN */
+document.getElementById('form-editar').addEventListener('submit', async function(evento) {
+    evento.preventDefault();
+
+    const id = document.getElementById('editar-id').value;
+    const mensaje = document.getElementById('mensaje-edicion');
+    const boton = document.getElementById('btn-guardar-edicion');
+
+    const datos = {
+        nombre: document.getElementById('editar-nombre').value.trim(),
+        correo: document.getElementById('editar-correo').value.trim(),
+        nombre_emprendimiento:
+            document.getElementById('editar-emprendimiento').value.trim(),
+        categoria: document.getElementById('editar-categoria').value.trim()
+    };
+
+    if (!Object.values(datos).every(valor => valor)) {
+        mensaje.textContent = 'Completa todos los campos.';
+        return;
+    }
+
+    boton.disabled = true;
+    mensaje.textContent = 'Guardando cambios...';
+
+    try {
+        await peticionProtegida(`${API}/expositores/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(datos)
+        });
+
+        cerrarModalEditar();
+        await cargarExpositores();
+
+        alert('Los datos del expositor se actualizaron correctamente.');
+
+    } catch (error) {
+        mensaje.textContent = error.message;
+
+    } finally {
+        boton.disabled = false;
+    }
+});
+
+/* CERRAR AL HACER CLIC FUERA DE LA VENTANA */
+document.getElementById('modal-editar').addEventListener('click', function(evento) {
+    if (evento.target === this) {
+        cerrarModalEditar();
+    }
+});
+
+/* CERRAR CON LA TECLA ESC */
+document.addEventListener('keydown', function(evento) {
+    if (evento.key === 'Escape') {
+        cerrarModalEditar();
+    }
+});
+
+/* ELIMINAR EXPOSITOR */
+async function eliminarExpositor(id) {
+    if (!confirm('¿Estás segura de que deseas eliminar este expositor?')) {
+        return;
+    }
+
+    try {
+        await peticionProtegida(`${API}/expositores/${id}`, {
+            method: 'DELETE'
+        });
+
+        alert('Expositor eliminado correctamente.');
+        await cargarExpositores();
+
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+/* REGISTRAR EXPOSITOR */
+document.getElementById('form-expositor').addEventListener('submit', async function(evento) {
+    evento.preventDefault();
+
+    const formulario = this;
+    const boton = document.getElementById('btn-registrar');
+    const mensaje = document.getElementById('mensaje-formulario');
+
+    const datos = {
+        nombre: formulario.elements['nombre'].value.trim(),
+        correo: formulario.elements['correo'].value.trim(),
+        nombre_emprendimiento:
+            formulario.elements['nombre_emprendimiento'].value.trim(),
+        categoria: formulario.elements['categoria'].value.trim()
+    };
+
+    boton.disabled = true;
+    mensaje.textContent = 'Registrando expositor...';
+
+    try {
+        await peticionProtegida(`${API}/expositores`, {
+            method: 'POST',
+            body: JSON.stringify(datos)
+        });
+
+        mensaje.textContent = '¡Expositor registrado correctamente!';
+        formulario.reset();
+
+        await cargarExpositores();
+
+    } catch (error) {
+        mensaje.textContent = error.message;
+
+    } finally {
+        boton.disabled = false;
+    }
+});
+
+/* CERRAR SESIÓN */
+function cerrarSesion() {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('usuario');
+    localStorage.removeItem('rol');
+
+    window.location.href = 'index.html';
+}
+
+/* CARGA INICIAL */
+cargarExpositores();
+</script>
+
+</body>
+</html>

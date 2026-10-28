@@ -1,0 +1,301 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo de Emprendimientos - Feria</title>
+    <link rel="stylesheet" href="style_catalogo.css">
+</head>
+<body>
+
+    <div class="catalog-container">
+        <div class="nav-link">
+            <a href="index.html">← Ir al formulario de registro</a>
+        </div>
+
+        <h1>Emprendimientos Inscritos</h1>
+
+        <div class="subtitle">
+            Explora todos los proyectos que participan en nuestra feria comercial.
+        </div>
+
+        <div id="contenedor-tarjetas" class="grid-container">
+            <p>Cargando emprendimientos...</p>
+        </div>
+
+        <section id="detalle" class="detalle oculto">
+            <button id="btn-volver" class="btn-volver" type="button">
+                ← Volver al catálogo
+            </button>
+
+            <h2 id="detalle-nombre"></h2>
+            <div id="detalle-informacion"></div>
+
+            <h3>Productos del emprendimiento</h3>
+
+            <div id="contenedor-productos">
+                <p>Selecciona un emprendimiento para consultar sus productos.</p>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const API = 'http://localhost:3000/feria';
+
+        const contenedor = document.getElementById('contenedor-tarjetas');
+        const detalle = document.getElementById('detalle');
+        const detalleNombre = document.getElementById('detalle-nombre');
+        const detalleInformacion = document.getElementById('detalle-informacion');
+        const contenedorProductos = document.getElementById('contenedor-productos');
+        const botonVolver = document.getElementById('btn-volver');
+
+        // Crear elementos sin insertar datos externos como HTML
+        function crearElemento(etiqueta, texto, clase = '') {
+            const elemento = document.createElement(etiqueta);
+            elemento.textContent = texto ?? '';
+
+            if (clase) {
+                elemento.className = clase;
+            }
+
+            return elemento;
+        }
+
+        // Cargar todos los emprendimientos
+        async function cargarEmprendimientos() {
+            contenedor.replaceChildren(
+                crearElemento('p', 'Cargando emprendimientos...')
+            );
+
+            try {
+                const respuesta = await fetch(`${API}/listar?estado=aprobado`);
+
+                if (!respuesta.ok) {
+                    throw new Error('No se pudieron cargar los emprendimientos.');
+                }
+
+                const expositores = await respuesta.json();
+
+                if (!Array.isArray(expositores) || expositores.length === 0) {
+                    contenedor.replaceChildren(
+                        crearElemento(
+                            'p',
+                            'No hay emprendimientos registrados todavía.'
+                        )
+                    );
+                    return;
+                }
+
+                contenedor.replaceChildren();
+
+                expositores.forEach(expositor => {
+                    const tarjeta = document.createElement('article');
+                    tarjeta.className = 'card';
+
+                    tarjeta.appendChild(
+                        crearElemento(
+                            'h3',
+                            expositor.nombre_emprendimiento ||
+                            'Emprendimiento sin nombre'
+                        )
+                    );
+
+                    tarjeta.appendChild(
+                        crearElemento(
+                            'p',
+                            `Expositor: ${expositor.nombre || 'No disponible'}`
+                        )
+                    );
+
+                    tarjeta.appendChild(
+                        crearElemento(
+                            'p',
+                            `Categoría: ${expositor.categoria || 'Sin categoría'}`
+                        )
+                    );
+
+                    const categoria = crearElemento(
+                        'span',
+                        expositor.categoria || 'General',
+                        'badge'
+                    );
+
+                    tarjeta.appendChild(categoria);
+
+                    const boton = crearElemento(
+                        'button',
+                        'Ver emprendimiento',
+                        'btn-ver'
+                    );
+
+                    boton.type = 'button';
+
+                    boton.addEventListener('click', () => {
+                        abrirDetalle(expositor);
+                    });
+
+                    tarjeta.appendChild(boton);
+                    contenedor.appendChild(tarjeta);
+                });
+
+            } catch (error) {
+                console.error('Error al cargar emprendimientos:', error);
+
+                contenedor.replaceChildren(
+                    crearElemento(
+                        'p',
+                        'No se pudo cargar el catálogo. Comprueba que el servidor esté iniciado.'
+                    )
+                );
+            }
+        }
+
+        // Mostrar los datos y los productos de un emprendimiento
+        async function abrirDetalle(expositor) {
+            if (expositor.id == null) {
+                alert('No se encontró el identificador de este emprendimiento.');
+                return;
+            }
+
+            detalleNombre.textContent =
+                expositor.nombre_emprendimiento || 'Emprendimiento';
+
+            detalleInformacion.replaceChildren();
+
+            detalleInformacion.appendChild(
+                crearElemento(
+                    'p',
+                    `Expositor: ${expositor.nombre || 'No disponible'}`
+                )
+            );
+
+            detalleInformacion.appendChild(
+                crearElemento(
+                    'p',
+                    `Correo: ${expositor.correo || 'No disponible'}`
+                )
+            );
+
+            detalleInformacion.appendChild(
+                crearElemento(
+                    'p',
+                    `Categoría: ${expositor.categoria || 'Sin categoría'}`
+                )
+            );
+
+            if (expositor.descripcion) {
+                detalleInformacion.appendChild(
+                    crearElemento('p', `Descripción: ${expositor.descripcion}`)
+                );
+            }
+
+            contenedor.classList.add('oculto');
+            detalle.classList.remove('oculto');
+
+            contenedorProductos.replaceChildren(
+                crearElemento('p', 'Cargando productos...')
+            );
+
+            try {
+                const respuesta = await fetch(
+                    `${API}/productos/expositor/${encodeURIComponent(expositor.id)}`
+                );
+
+                if (!respuesta.ok) {
+                    throw new Error('No se pudieron consultar los productos.');
+                }
+
+                const resultado = await respuesta.json();
+
+                // El controlador devuelve los productos en la propiedad "datos".
+                const productos = resultado.datos;
+
+                if (!Array.isArray(productos) || productos.length === 0) {
+                    contenedorProductos.replaceChildren(
+                        crearElemento(
+                            'p',
+                            'Este emprendimiento todavía no tiene productos publicados.'
+                        )
+                    );
+                    return;
+                }
+
+                contenedorProductos.replaceChildren();
+
+                productos.forEach(producto => {
+                    const tarjetaProducto = document.createElement('article');
+                    tarjetaProducto.className = 'producto';
+
+                    const imagenProducto = document.createElement('div');
+                    imagenProducto.className = 'producto-imagen';
+
+                    if (producto.imagen_url) {
+                        const imagen = document.createElement('img');
+                        imagen.src = producto.imagen_url;
+                        imagen.alt = producto.nombre || 'Imagen del producto';
+                        imagen.onerror = () => {
+                            imagenProducto.replaceChildren(
+                                crearElemento('span', producto.icono || '📦')
+                            );
+                        };
+                        imagenProducto.appendChild(imagen);
+                    } else {
+                        imagenProducto.appendChild(
+                            crearElemento('span', producto.icono || '📦')
+                        );
+                    }
+
+                    tarjetaProducto.appendChild(imagenProducto);
+
+                    tarjetaProducto.appendChild(
+                        crearElemento(
+                            'h4',
+                            producto.nombre || 'Producto sin nombre'
+                        )
+                    );
+
+                    tarjetaProducto.appendChild(
+                        crearElemento(
+                            'p',
+                            producto.descripcion || 'Sin descripción disponible.'
+                        )
+                    );
+
+                    if (producto.precio !== null && producto.precio !== undefined) {
+                        tarjetaProducto.appendChild(
+                            crearElemento(
+                                'p',
+                                `Precio: $${Number(producto.precio).toLocaleString('es-CO')}`,
+                                'precio'
+                            )
+                        );
+                    }
+
+                    contenedorProductos.appendChild(tarjetaProducto);
+                });
+
+            } catch (error) {
+                console.error('Error al cargar los productos:', error);
+
+                contenedorProductos.replaceChildren(
+                    crearElemento(
+                        'p',
+                        'No se pudieron cargar los productos. Intenta nuevamente.'
+                    )
+                );
+            }
+        }
+
+        // Regresar al listado de emprendimientos
+        botonVolver.addEventListener('click', () => {
+            detalle.classList.add('oculto');
+            contenedor.classList.remove('oculto');
+        });
+
+        // Iniciar el catálogo
+        cargarEmprendimientos();
+    </script>
+
+</body>
+</html>

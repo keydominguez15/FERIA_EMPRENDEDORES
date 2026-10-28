@@ -1,0 +1,416 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #2c0b3c 0%, #170522 100%);
+    color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
+/* Contenedor principal para el formulario (index.html) */
+.main-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 90%;
+    max-width: 1000px;
+    background: rgba(43, 11, 60, 0.6);
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 50px;
+    box-sizing: border-box;
+}
+
+/* Contenedor principal para el catálogo (catalogo.html) */
+.catalog-container {
+    width: 90%;
+    max-width: 1100px;
+    padding: 40px 20px;
+    margin: 0 auto;
+}
+
+/* Lado izquierdo (Bienvenida del index) */
+.welcome-section {
+    flex: 1;
+    padding-right: 40px;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+    color: #ff758c;
+    margin-bottom: 30px;
+}
+
+.welcome-section h1, h1 {
+    font-size: 38px;
+    margin: 0 0 10px 0;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    text-align: left;
+}
+
+.catalog-container h1 {
+    text-align: center;
+}
+
+.subtitle {
+    text-align: center;
+    color: #d1c4e9;
+    margin-bottom: 40px;
+    font-size: 15px;
+}
+
+.divider {
+    width: 50px;
+    height: 3px;
+    background-color: #ff758c;
+    margin-bottom: 20px;
+}
+
+.welcome-section p {
+    color: #d1c4e9;
+    font-size: 15px;
+    line-height: 1.6;
+    margin-bottom: 30px;
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%);
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(255, 117, 140, 0.4);
+    transition: transform 0.2s ease;
+}
+
+.btn-secondary:hover {
+    transform: translateY(-2px);
+}
+
+/* Tarjeta de Formulario Estilo Vidrio */
+.form-card {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    padding: 35px;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.form-card h2 {
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 25px;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+label {
+    display: block;
+    margin-top: 12px;
+    font-weight: 500;
+    color: #e0d4f7;
+    font-size: 13px;
+}
+
+input, select {
+    width: 100%;
+    padding: 11px 14px;
+    margin-top: 6px;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    box-sizing: border-box;
+    color: #ffffff;
+    font-size: 14px;
+    transition: border-color 0.2s;
+}
+
+input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+select option {
+    background-color: #2c0b3c;
+    color: white;
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: #ff758c;
+}
+
+.btn-submit {
+    width: 100%;
+    background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%);
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    margin-top: 25px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(255, 117, 140, 0.4);
+    transition: transform 0.2s ease, opacity 0.2s;
+}
+
+.btn-submit:hover {
+    transform: translateY(-2px);
+    opacity: 0.95;
+}
+
+#mensaje {
+    margin-top: 15px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+/* Cuadrícula de tarjetas para el catálogo */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card h3 {
+    margin-top: 0;
+    color: #ff758c;
+    font-size: 20px;
+}
+
+.card p {
+    margin: 8px 0;
+    color: #e0d4f7;
+    font-size: 14px;
+}
+
+.badge {
+    display: inline-block;
+    background: rgba(255, 117, 140, 0.2);
+    color: #ff758c;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 10px;
+}
+
+.nav-link {
+    margin-bottom: 25px;
+}
+
+.nav-link a {
+    color: #ff7eb3;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.nav-link a:hover {
+    text-decoration: underline;
+}
+
+/* Responsivo para pantallas pequeñas */
+@media (max-width: 768px) {
+    .main-container {
+        flex-direction: column;
+        padding: 25px;
+        margin: 20px;
+    }
+    .welcome-section {
+        padding-right: 0;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    .welcome-section h1 {
+        text-align: center;
+    }
+    .divider {
+        margin: 0 auto 20px auto;
+    }
+}
+
+
+/* Botón para ver el emprendimiento */
+.btn-ver {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%);
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.btn-ver:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+}
+
+/* Panel de información del emprendimiento */
+.detalle {
+    margin-top: 30px;
+    padding: 25px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+}
+
+.detalle h2 {
+    color: #ff758c;
+    font-size: 28px;
+    margin-top: 20px;
+}
+
+.detalle h3 {
+    margin-top: 30px;
+    color: #ff7eb3;
+}
+
+.detalle p {
+    color: #e0d4f7;
+    line-height: 1.6;
+}
+
+/* Botón para volver al catálogo */
+.btn-volver {
+    padding: 10px 18px;
+    background: transparent;
+    border: 1px solid #ff758c;
+    color: #ff7eb3;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-volver:hover {
+    background: rgba(255, 117, 140, 0.12);
+}
+
+/* Tarjetas de productos */
+#contenedor-productos {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 18px;
+}
+
+.producto {
+    flex: 1 1 320px;
+    max-width: 430px;
+    min-width: 0;
+    padding: 18px;
+    margin: 0;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    transition: border-color 0.2s ease;
+}
+
+.producto:hover {
+    border-color: rgba(255, 117, 140, 0.6);
+}
+
+.producto-imagen {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    margin-bottom: 14px;
+    overflow: hidden;
+    border-radius: 8px;
+    background: rgba(12, 4, 20, 0.55);
+    font-size: 48px;
+}
+
+.producto-imagen img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.producto h4 {
+    color: #ff758c;
+    font-size: 18px;
+    margin: 0 0 10px;
+}
+
+.producto p {
+    margin: 0 0 10px;
+    color: #e0d4f7;
+    font-size: 14px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+.producto .precio {
+    color: #ff7eb3;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+/* Ocultar el catálogo cuando se consultan los detalles */
+.oculto {
+    display: none !important;
+}
+
+/* Ajustes para celulares */
+@media (max-width: 600px) {
+    .catalog-container {
+        width: 92%;
+        padding: 25px 0;
+    }
+
+    .detalle {
+        padding: 18px;
+    }
+
+    .producto {
+        flex-basis: 100%;
+        max-width: 100%;
+    }
+
+    .detalle h2 {
+        font-size: 23px;
+    }
+
+    .grid-container {
+        grid-template-columns: 1fr;
+    }
+
+    .btn-ver,
+    .btn-volver {
+        width: 100%;
+    }
+}

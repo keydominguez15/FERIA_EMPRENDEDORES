@@ -1,0 +1,270 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #2c0b3c 0%, #170522 100%);
+    color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
+/* Contenedor principal */
+.main-container {
+    display: flex;
+    width: min(950px, calc(100% - 32px));
+    min-height: 560px;
+    background: rgba(43, 11, 60, 0.6);
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    overflow: hidden;
+    position: relative;
+}
+
+/* Panel Izquierdo */
+.welcome-section {
+    width: 42%;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-sizing: border-box;
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.top-link a {
+    color: #ff7eb3;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+}
+.top-link a:hover {
+    text-decoration: underline;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+    color: #ff758c;
+    margin-bottom: 10px;
+}
+
+.welcome-content h1 {
+    font-size: 32px;
+    margin: 0 0 10px 0;
+    font-weight: 700;
+}
+
+.divider {
+    width: 50px;
+    height: 3px;
+    background-color: #ff758c;
+    margin-bottom: 15px;
+}
+
+.welcome-content p {
+    color: #d1c4e9;
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 10px;
+}
+
+.btn-outline {
+    background: transparent;
+    color: #ffffff;
+    border: 2px solid #ff758c;
+    padding: 10px 25px;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 10px;
+}
+
+.btn-outline:hover {
+    background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%);
+    box-shadow: 0 4px 15px rgba(255, 117, 140, 0.4);
+}
+
+/* Panel Derecho */
+.form-card {
+    width: 58%;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 30px 40px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centrado vertical para el login */
+    position: relative;
+    max-height: 100%;
+}
+
+.form-card::-webkit-scrollbar {
+    width: 6px;
+}
+.form-card::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+}
+
+.help-text {
+    position: absolute;
+    top: 25px;
+    right: 40px;
+    font-size: 12px;
+    color: #d1c4e9;
+    cursor: pointer;
+}
+
+/* Formularios contenidos con ancho moderado y centrados */
+.form-card form {
+    width: 100%;
+    max-width: 340px; /* Evita que los campos se estiren demasiado */
+    margin: 0 auto;  /* Centra horizontalmente */
+}
+
+.form-card h2 {
+    font-size: 28px;
+    color: #ffffff;
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-weight: 700;
+    text-align: center; /* Título centrado para el login */
+}
+
+label {
+    display: block;
+    margin-top: 12px;
+    font-weight: 500;
+    color: #e0d4f7;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+input, select {
+    width: 100%;
+    padding: 10px 14px;
+    margin-top: 5px;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    box-sizing: border-box;
+    color: #ffffff;
+    font-size: 14px;
+}
+
+input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+select option {
+    background-color: #2c0b3c;
+    color: white;
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: #ff758c;
+}
+
+.forgot-pass {
+    text-align: right;
+    font-size: 12px;
+    color: #d1c4e9;
+    margin-top: 8px;
+    margin-bottom: 20px;
+    cursor: pointer;
+}
+.forgot-pass:hover {
+    color: #ff7eb3;
+}
+
+.btn-submit {
+    width: 100%;
+    background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%);
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(255, 117, 140, 0.4);
+    transition: transform 0.2s ease;
+    margin-top: 10px;
+}
+
+.btn-submit:hover {
+    transform: translateY(-2px);
+}
+
+#mensaje-log, #mensaje-reg {
+    margin-top: 12px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+/* Responsivo para móviles */
+@media (max-width: 768px) {
+    body {
+        align-items: flex-start;
+        padding: 16px 0;
+    }
+
+    .main-container {
+        flex-direction: column;
+        width: calc(100% - 28px);
+        min-height: 0;
+        height: auto;
+        overflow: visible;
+    }
+    .welcome-section {
+        width: 100%;
+        padding: 22px 24px;
+        flex: none;
+    }
+    .form-card {
+        width: 100%;
+        max-height: none;
+        padding: 24px;
+        flex: none;
+        justify-content: flex-start;
+    }
+    .form-card form {
+        max-width: 100%;
+    }
+    .help-text {
+        position: static;
+        margin-bottom: 12px;
+        text-align: right;
+    }
+    .welcome-content h1 {
+        font-size: 27px;
+    }
+}
+
+@media (max-width: 420px) {
+    .main-container {
+        width: calc(100% - 20px);
+        border-radius: 15px;
+    }
+
+    .welcome-section,
+    .form-card {
+        padding: 20px 17px;
+    }
+
+    .welcome-section h1,
+    h1 {
+        font-size: 29px;
+    }
+}
+
+.oculto {
+    display: none !important;
+}
