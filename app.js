@@ -3,6 +3,9 @@ const app = express();
 const cors = require('cors');
 const rutas_expositores = require('./routes/expositorRutas');
 const rutas_productos = require('./routes/productoRutas');
+const path = require('path');
+
+app.use(express.static(__dirname));
 
 require('dotenv').config();
 
@@ -30,6 +33,10 @@ console.log('Rutas de expositores cargadas:', rutas_expositores.stack.map(r => (
     metodo: Object.keys(r.route?.methods || {}),
     ruta: r.route?.path
 })));
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
 
 app.listen(puerto, function () {
     console.log('--- Servidor de la Feria Iniciado ---');
