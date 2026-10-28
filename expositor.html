@@ -635,7 +635,7 @@ async function eliminarProducto(id) {
         }
 
         const respuesta = await fetch(
-            `http://localhost:3000/feria/productos/${id}?id_expositor=${idExpositor}`,
+            `/feria/productos/${id}?id_expositor=${idExpositor}`,
             {
                 method: 'DELETE',
                 headers: {
@@ -785,7 +785,7 @@ if (file) {
     if (edit) formularioImagen.append('id_producto', String(p.id));
 
     const respuestaImagen = await fetch(
-        'http://localhost:3000/feria/productos/imagen',
+        '/feria/productos/imagen',
         {
             method: 'POST',
             headers: {
@@ -831,8 +831,8 @@ if (file) {
         if (file) datos.imagen_url = imagenUrl;
 
         const url = edit
-            ? `http://localhost:3000/feria/productos/${p.id}`
-            : 'http://localhost:3000/feria/productos';
+            ? `/feria/productos/${p.id}`
+            : `/feria/productos`;
 
         const respuesta = await fetch(url, {
             method: edit ? 'PUT' : 'POST',
@@ -937,7 +937,7 @@ async function cargarDatosExpositor() {
     const idExpositor = state.businesses[0].id;
 
     const respuestaProductos = await fetch(
-        `http://localhost:3000/feria/productos/expositor/${idExpositor}`
+        `/feria/productos/expositor/${idExpositor}`
     );
 
     if (!respuestaProductos.ok) {
